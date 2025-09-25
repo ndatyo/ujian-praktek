@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Voting UJIAN PRAKTEK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Background animasi */
+        .animated-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .animated-bg::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 30s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Card styles */
+        .card-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+        
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.15), 0 15px 15px -5px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Floating animation */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Progress bar animation */
+        .progress-bar {
+            transition: width 1.5s ease-in-out;
+        }
+        
+        /* Custom scrollbar - Lebih jelas dan lebih besar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            margin: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Candidate card hover effect */
+        .candidate-card {
+            transition: all 0.3s ease;
+        }
+        
+        .candidate-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        /* Voting button effect */
+        .vote-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .vote-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .vote-btn:hover::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+        
+        /* Notification animation */
+        .notification {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Logo styling */
+        .school-logo {
+            animation: logoFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+        
+        /* Tab styling */
+        .tab-active {
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+        }
+        
+        /* Delete button */
+        .delete-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .delete-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Confirmation modal */
+        .confirm-modal {
+            backdrop-filter: blur(5px);
+        }
+        
+        /* Scrollable container styling - Diperkecil untuk layar laptop */
+        .scrollable-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .scrollable-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollable-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .scrollable-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        .scrollable-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* Class group styling */
+        .class-group {
+            margin-bottom: 12px;
+        }
+        
+        .class-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        
+        .class-content {
+            background: white;
+            border-radius: 6px;
+            padding: 6px;
+        }
+        
+        /* Accordion styling */
+        .accordion {
+            transition: max-height 0.3s ease-out;
+            overflow: hidden;
+        }
+        
+        .accordion.collapsed {
+            max-height: 40px;
+        }
+        
+        .accordion.expanded {
+            max-height: 500px;
+        }
+        
+        .accordion-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        /* Filter styling */
+        .filter-container {
+            margin-bottom: 12px;
+        }
+        
+        .filter-select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background-color: white;
+            font-size: 14px;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Background image for login page */
+        .login-bg {
+            background-image: url('https://z-cdn-media.chatglm.cn/files/07bf4db1-86bd-4584-abf7-16903784bb25_pasted_image_1758819039841.jpg?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-82603ec9231d093e5f2f56a6a1cf1a17');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        .login-bg::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .login-content {
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Footer styling - Fixed di bagian bawah */
+        footer {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px 0;
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .footer-creator {
+            text-align: right;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-creator {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+        
+        /* Main container styling - Mengatur tinggi maksimum */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        
+        /* Admin dashboard styling - Mengatur tinggi maksimum */
+        .admin-dashboard-container {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        
+        /* Form styling - Mengurangi jarak */
+        .form-container {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        /* Candidate card styling - Mengurangi ukuran */
+        .candidate-card {
+            padding: 15px;
+        }
+        
+        /* Voting section styling - Mengatur tinggi maksimum */
+        .voting-container {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+        
+        /* Results section styling - Mengatur tinggi maksimum */
+        .results-container {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="animated-bg">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse-slow" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass sticky top-0 z-40 border-b border-white/20">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center relative z-10">
+            <div class="flex items-center space-x-3">
+                <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-10 h-10 rounded-full">
+                <h1 class="text-white text-xl font-bold">E-Voting UJIAN PRAKTEK</h1>
+            </div>
+            <button id="adminLoginBtn" class="glass text-white px-4 py-1 rounded-full transition-all duration-300 hover:bg-white/20 flex items-center space-x-2 text-sm">
+                <i class="fas fa-user-shield"></i>
+                <span>Login Admin</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container container mx-auto px-6 py-6 relative z-10">
+        <!-- Student Login Section -->
+        <div id="studentLogin" class="max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6 animate-fade-in login-content">
+            <div class="text-center mb-6">
+                <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-24 h-24 mx-auto mb-4 school-logo">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Pemilihan UJIAN PRAKTEK</h2>
+                <p class="text-gray-600">Masukkan NISN untuk memulai voting</p>
+            </div>
+            <form id="studentLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">NISN</label>
+                    <div class="relative">
+                        <input type="text" id="studentNisn" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Masukkan NISN Anda" required>
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-id-card text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="w-full btn-primary text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 flex items-center justify-center space-x-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Masuk Voting</span>
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <button id="viewResultsBtn" class="text-purple-600 hover:text-purple-800 font-medium flex items-center justify-center space-x-1 mx-auto">
+                    <span>Lihat Hasil Pemilihan</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Login Modal -->
+        <div id="adminModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 max-w-md w-full mx-4 card-shadow">
+                <div class="text-center mb-4">
+                    <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-16 h-16 mx-auto mb-2">
+                    <h3 class="text-xl font-bold text-gray-800">Login Admin</h3>
+                </div>
+                <form id="adminLoginForm" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="relative">
+                            <input type="text" id="adminUsername" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="admin" required>
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="adminPassword" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" placeholder="admin123" required>
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-colors flex items-center justify-center space-x-2">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login</span>
+                        </button>
+                        <button type="button" id="closeAdminModal" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-colors flex items-center justify-center space-x-2">
+                            <i class="fas fa-times"></i>
+                            <span>Batal</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="hidden animate-fade-in admin-dashboard-container">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-10 h-10 rounded-full">
+                        <h2 class="text-xl font-bold text-gray-800">Dashboard Admin</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="resetVotingBtn" class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors flex items-center space-x-1 text-sm">
+                            <i class="fas fa-redo-alt"></i>
+                            <span>Reset Voting</span>
+                        </button>
+                        <button id="logoutBtn" class="bg-gray-600 text-white px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-1 text-sm">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200 mb-4">
+                    <nav class="-mb-px flex space-x-6">
+                        <button id="dashboardTab" class="tab-btn py-2 px-1 border-b-2 font-medium text-sm tab-active" data-tab="dashboard">
+                            <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                        </button>
+                        <button id="votersTab" class="tab-btn py-2 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="voters">
+                            <i class="fas fa-users mr-1"></i> Pemilih
+                        </button>
+                        <button id="candidatesTab" class="tab-btn py-2 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="candidates">
+                            <i class="fas fa-user-tie mr-1"></i> Kandidat
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Dashboard Tab Content -->
+                <div id="dashboardContent" class="tab-content">
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium">Total Pemilih</p>
+                                    <p class="text-2xl font-bold mt-1" id="totalVoters">0</p>
+                                </div>
+                                <div class="bg-blue-400 bg-opacity-30 p-2 rounded-full">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium">Total Kandidat</p>
+                                    <p class="text-2xl font-bold mt-1" id="totalCandidates">0</p>
+                                </div>
+                                <div class="bg-purple-400 bg-opacity-30 p-2 rounded-full">
+                                    <i class="fas fa-user-tie text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium">Total Suara</p>
+                                    <p class="text-2xl font-bold mt-1" id="totalVotes">0</p>
+                                </div>
+                                <div class="bg-green-400 bg-opacity-30 p-2 rounded-full">
+                                    <i class="fas fa-vote-yea text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Statistik Voting</h3>
+                        <div id="adminResultsChart" class="space-y-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Voters Tab Content -->
+                <div id="votersContent" class="tab-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Add Voter Form -->
+                        <div class="bg-gray-50 rounded-xl p-4 form-container">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center space-x-2">
+                                <i class="fas fa-user-plus text-blue-600"></i>
+                                <span>Tambah Pemilih</span>
+                            </h3>
+                            <form id="addVoterForm" class="space-y-3">
+                                <div class="relative form-group">
+                                    <input type="text" id="voterName" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Nama Lengkap" required>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="relative form-group">
+                                    <input type="text" id="voterNisn" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="NISN" required>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-id-card text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="relative form-group">
+                                    <input type="text" id="voterClass" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Kelas (contoh: X IPA 1)" required>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-school text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Tambah Pemilih</span>
+                                </button>
+                            </form>
+                            
+                            <div class="mt-3 pt-3 border-t border-gray-300">
+                                <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                                    <i class="fas fa-file-import text-green-600"></i>
+                                    <span>Import Data Siswa</span>
+                                </h4>
+                                <input type="file" id="importFile" accept=".csv,.txt" class="hidden">
+                                <button id="importBtn" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-file-csv"></i>
+                                    <span>Import dari File CSV</span>
+                                </button>
+                                <p class="text-xs text-gray-500 mt-1">Format: Nama,NISN,Kelas (satu baris per siswa)</p>
+                            </div>
+                        </div>
+
+                        <!-- Voters List -->
+                        <div class="bg-gray-50 rounded-xl p-4 relative">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                    <i class="fas fa-list text-purple-600"></i>
+                                    <span>Daftar Pemilih</span>
+                                </h3>
+                                <span class="text-sm text-gray-600" id="votersCount">0 pemilih</span>
+                            </div>
+                            
+                            <!-- Filter by Class -->
+                            <div class="filter-container mb-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Berdasarkan Kelas</label>
+                                <select id="classFilter" class="filter-select">
+                                    <option value="all">Semua Kelas</option>
+                                </select>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-3 scrollable-container relative">
+                                <div id="votersList" class="space-y-2"></div>
+                                <div class="scroll-indicator">
+                                    <i class="fas fa-arrows-alt-v"></i> Scroll
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Candidates Tab Content -->
+                <div id="candidatesContent" class="tab-content hidden">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Add Candidate Form -->
+                        <div class="bg-gray-50 rounded-xl p-4 form-container">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center space-x-2">
+                                <i class="fas fa-user-tie text-green-600"></i>
+                                <span>Tambah Kandidat</span>
+                            </h3>
+                            <form id="addCandidateForm" class="space-y-3">
+                                <div class="relative form-group">
+                                    <input type="text" id="candidateName" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Nama Kandidat" required>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-user text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <div class="relative form-group">
+                                    <input type="text" id="candidateClass" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Kelas" required>
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fas fa-school text-gray-400"></i>
+                                    </div>
+                                </div>
+                                <textarea id="candidateVision" class="w-full px-4 py-2 border border-gray-300 rounded-lg form-group" rows="2" placeholder="Visi & Misi" required></textarea>
+                                
+                                <div class="form-group">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center space-x-2">
+                                        <i class="fas fa-image text-purple-600"></i>
+                                        <span>Foto Kandidat</span>
+                                    </label>
+                                    <input type="file" id="candidatePhoto" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    <div id="photoPreview" class="mt-1 hidden">
+                                        <img id="previewImg" class="w-16 h-16 object-cover rounded-lg border-2 border-gray-300">
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Tambah Kandidat</span>
+                                </button>
+                            </form>
+                            
+                            <div class="mt-3 pt-3 border-t border-gray-300">
+                                <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                                    <i class="fas fa-file-archive text-orange-600"></i>
+                                    <span>Import Data Kandidat</span>
+                                </h4>
+                                <input type="file" id="importCandidateFile" accept=".zip" class="hidden">
+                                <button id="importCandidateBtn" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2">
+                                    <i class="fas fa-file-archive"></i>
+                                    <span>Import Kandidat (ZIP)</span>
+                                </button>
+                                <p class="text-xs text-gray-500 mt-1">Upload file ZIP berisi: data.csv (Nama,Kelas,Visi) + foto kandidat</p>
+                                
+                                <div class="mt-2">
+                                    <button id="downloadTemplateBtn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2">
+                                        <i class="fas fa-download"></i>
+                                        <span>Download Template CSV</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Candidates List -->
+                        <div class="bg-gray-50 rounded-xl p-4 relative">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
+                                    <i class="fas fa-list text-purple-600"></i>
+                                    <span>Daftar Kandidat</span>
+                                </h3>
+                                <span class="text-sm text-gray-600" id="candidatesCount">0 kandidat</span>
+                            </div>
+                            <div class="bg-white rounded-lg p-3 scrollable-container relative">
+                                <div id="candidatesList" class="space-y-3"></div>
+                                <div class="scroll-indicator">
+                                    <i class="fas fa-arrows-alt-v"></i> Scroll
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voting Section -->
+        <div id="votingSection" class="hidden animate-fade-in voting-container">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6">
+                <div class="text-center mb-6">
+                    <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-20 h-20 mx-auto mb-3 school-logo">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Pilih Kandidat UJIAN PRAKTEK</h2>
+                    <p class="text-gray-600">Pilih salah satu kandidat di bawah ini</p>
+                </div>
+                <div id="candidatesListVoting" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+                <div class="text-center">
+                    <button id="backToLogin" class="text-purple-600 hover:text-purple-800 font-medium flex items-center justify-center space-x-1 mx-auto">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Login</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden animate-fade-in results-container">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6">
+                <div class="text-center mb-6">
+                    <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-20 h-20 mx-auto mb-3 school-logo">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Hasil Pemilihan</h2>
+                    <p class="text-gray-600">Real-time hasil voting ujian praktek</p>
+                </div>
+                <div id="resultsChart" class="mb-6"></div>
+                <div class="text-center">
+                    <button id="backToLoginFromResults" class="text-purple-600 hover:text-purple-800 font-medium flex items-center justify-center space-x-1 mx-auto">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Login</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container mx-auto px-6">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p class="mb-1"><strong>E-Voting UJIAN PRAKTEK SMA Negeri 20</strong></p>
+                    <p class="text-sm">Sistem pemilihan ujian praktek yang transparan, efisien, dan modern</p>
+                    <p class="text-sm">Dibangun dengan teknologi web terkini untuk memastikan integritas dan keamanan proses voting</p>
+                </div>
+                <div class="footer-creator">
+                    <p>Dikembangkan oleh: ndatyo@2025</p>
+                    <p class="text-sm">© 2025 - All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 confirm-modal">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 card-shadow">
+            <div class="text-center mb-4">
+                <div class="w-14 h-14 bg-red-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800" id="confirmTitle">Konfirmasi</h3>
+                <p class="text-gray-600 mt-1" id="confirmMessage">Apakah Anda yakin ingin melanjutkan?</p>
+            </div>
+            <div class="flex space-x-3">
+                <button id="confirmYes" class="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                    Ya, Lanjutkan
+                </button>
+                <button id="confirmNo" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // Data Storage
+        let voters = JSON.parse(localStorage.getItem('voters')) || [];
+        let candidates = JSON.parse(localStorage.getItem('candidates')) || [];
+        let votes = JSON.parse(localStorage.getItem('votes')) || {};
+        let votedNisns = JSON.parse(localStorage.getItem('votedNisns')) || [];
+
+        // Initialize with sample data if empty
+        if (candidates.length === 0) {
+            candidates = [
+                {
+                    id: 1,
+                    name: "Ahmad Rizki",
+                    class: "XI IPA 1",
+                    vision: "Mewujudkan ujian praktek yang adil, transparan, dan berkualitas untuk kemajuan sekolah bersama.",
+                    photo: "👨‍🎓"
+                },
+                {
+                    id: 2,
+                    name: "Siti Nurhaliza",
+                    class: "XI IPS 2",
+                    vision: "Membangun sistem ujian praktek yang efektif dan meningkatkan prestasi sekolah.",
+                    photo: "👩‍🎓"
+                }
+            ];
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+        }
+
+        if (voters.length === 0) {
+            voters = [
+                { name: "Budi Santoso", nisn: "1234567890", class: "X IPA 1" },
+                { name: "Ani Wijaya", nisn: "0987654321", class: "X IPS 1" },
+                { name: "Dedi Kurniawan", nisn: "1122334455", class: "XI IPA 2" },
+                { name: "Eko Prasetyo", nisn: "5544332211", class: "XI IPA 1" },
+                { name: "Fitri Handayani", nisn: "6677889900", class: "X IPA 2" },
+                { name: "Gunawan Wijaya", nisn: "9988776655", class: "X IPS 2" }
+            ];
+            localStorage.setItem('voters', JSON.stringify(voters));
+        }
+
+        // DOM Elements
+        const studentLogin = document.getElementById('studentLogin');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const votingSection = document.getElementById('votingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const adminModal = document.getElementById('adminModal');
+        const confirmModal = document.getElementById('confirmModal');
+
+        // Show message function
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            messageDiv.className = `p-4 rounded-lg text-white font-medium notification flex items-center space-x-2 ${bgColor}`;
+            messageDiv.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+            `;
+            document.getElementById('messageContainer').appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        // Show confirmation modal
+        function showConfirmation(title, message, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+            
+            document.getElementById('confirmYes').onclick = () => {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                onConfirm();
+            };
+            
+            document.getElementById('confirmNo').onclick = () => {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+            };
+        }
+
+        // Admin Login
+        document.getElementById('adminLoginBtn').addEventListener('click', () => {
+            adminModal.classList.remove('hidden');
+            adminModal.classList.add('flex');
+        });
+
+        document.getElementById('closeAdminModal').addEventListener('click', () => {
+            adminModal.classList.add('hidden');
+            adminModal.classList.remove('flex');
+        });
+
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (username === 'admin' && password === 'admin123') {
+                adminModal.classList.add('hidden');
+                studentLogin.classList.add('hidden');
+                adminDashboard.classList.remove('hidden');
+                updateDashboardStats();
+                updateVotersList();
+                updateCandidatesList();
+                updateClassFilter();
+                showMessage('Login admin berhasil!');
+            } else {
+                showMessage('Username atau password salah!', 'error');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            adminDashboard.classList.add('hidden');
+            studentLogin.classList.remove('hidden');
+            showMessage('Logout berhasil!');
+        });
+
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.getAttribute('data-tab');
+                
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('tab-active', 'text-purple-600');
+                    b.classList.add('text-gray-500');
+                });
+                btn.classList.add('tab-active', 'text-purple-600');
+                btn.classList.remove('text-gray-500');
+                
+                // Show corresponding content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${tabName}Content`).classList.remove('hidden');
+                
+                // Update specific tab content
+                if (tabName === 'dashboard') {
+                    updateDashboardStats();
+                    updateAdminResultsChart();
+                } else if (tabName === 'voters') {
+                    updateVotersList();
+                } else if (tabName === 'candidates') {
+                    updateCandidatesList();
+                }
+            });
+        });
+
+        // Reset Voting
+        document.getElementById('resetVotingBtn').addEventListener('click', () => {
+            showConfirmation(
+                'Reset Voting',
+                'Apakah Anda yakin ingin mereset semua data voting? Tindakan ini tidak dapat dibatalkan.',
+                () => {
+                    votes = {};
+                    votedNisns = [];
+                    localStorage.setItem('votes', JSON.stringify(votes));
+                    localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
+                    updateDashboardStats();
+                    updateAdminResultsChart();
+                    updateVotersList();
+                    showMessage('Data voting berhasil direset!');
+                }
+            );
+        });
+
+        // Update Dashboard Stats
+        function updateDashboardStats() {
+            document.getElementById('totalVoters').textContent = voters.length;
+            document.getElementById('totalCandidates').textContent = candidates.length;
+            document.getElementById('totalVotes').textContent = Object.values(votes).reduce((sum, count) => sum + count, 0);
+        }
+
+        // Update Admin Results Chart
+        function updateAdminResultsChart() {
+            const adminResultsChart = document.getElementById('adminResultsChart');
+            adminResultsChart.innerHTML = '';
+            
+            const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            
+            if (totalVotes === 0) {
+                adminResultsChart.innerHTML = '<p class="text-center text-gray-500">Belum ada suara masuk</p>';
+                return;
+            }
+            
+            candidates.forEach(candidate => {
+                const voteCount = votes[candidate.id] || 0;
+                const percentage = (voteCount / totalVotes * 100).toFixed(1);
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'bg-white p-3 rounded-lg';
+                resultItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium">${candidate.name}</span>
+                        <span class="text-sm text-gray-600">${voteCount} suara (${percentage}%)</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                adminResultsChart.appendChild(resultItem);
+            });
+        }
+
+        // Add Voter
+        document.getElementById('addVoterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('voterName').value;
+            const nisn = document.getElementById('voterNisn').value;
+            const voterClass = document.getElementById('voterClass').value;
+            
+            if (voters.find(v => v.nisn === nisn)) {
+                showMessage('NISN sudah terdaftar!', 'error');
+                return;
+            }
+            
+            voters.push({ name, nisn, class: voterClass });
+            localStorage.setItem('voters', JSON.stringify(voters));
+            updateVotersList();
+            updateClassFilter();
+            updateDashboardStats();
+            document.getElementById('addVoterForm').reset();
+            showMessage('Pemilih berhasil ditambahkan!');
+        });
+
+        // Delete Voter
+        function deleteVoter(nisn) {
+            showConfirmation(
+                'Hapus Pemilih',
+                'Apakah Anda yakin ingin menghapus pemilih ini?',
+                () => {
+                    voters = voters.filter(v => v.nisn !== nisn);
+                    votedNisns = votedNisns.filter(n => n !== nisn);
+                    localStorage.setItem('voters', JSON.stringify(voters));
+                    localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
+                    updateVotersList();
+                    updateClassFilter();
+                    updateDashboardStats();
+                    showMessage('Pemilih berhasil dihapus!');
+                }
+            );
+        }
+
+        // Import File Handler for Voters
+        document.getElementById('importBtn').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const text = event.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                let imported = 0;
+                let skipped = 0;
+
+                lines.forEach(line => {
+                    const [name, nisn, voterClass] = line.split(',').map(item => item.trim());
+                    if (name && nisn && voterClass) {
+                        if (!voters.find(v => v.nisn === nisn)) {
+                            voters.push({ name, nisn, class: voterClass });
+                            imported++;
+                        } else {
+                            skipped++;
+                        }
+                    }
+                });
+
+                localStorage.setItem('voters', JSON.stringify(voters));
+                updateVotersList();
+                updateClassFilter();
+                updateDashboardStats();
+                showMessage(`Import berhasil! ${imported} siswa ditambahkan, ${skipped} dilewati (sudah ada)`);
+            };
+            reader.readAsText(file);
+        });
+
+        // Update Class Filter Options
+        function updateClassFilter() {
+            const classFilter = document.getElementById('classFilter');
+            const currentSelection = classFilter.value;
+            
+            // Get unique classes
+            const classes = [...new Set(voters.map(v => v.class))].sort();
+            
+            // Clear current options except "all"
+            classFilter.innerHTML = '<option value="all">Semua Kelas</option>';
+            
+            // Add class options
+            classes.forEach(className => {
+                const option = document.createElement('option');
+                option.value = className;
+                option.textContent = className;
+                classFilter.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (classes.includes(currentSelection) || currentSelection === 'all') {
+                classFilter.value = currentSelection;
+            }
+        }
+
+        // Class Filter Change Handler
+        document.getElementById('classFilter').addEventListener('change', (e) => {
+            updateVotersList();
+        });
+
+        // Update Voters List - Grouped by Class with Filter
+        function updateVotersList() {
+            const votersList = document.getElementById('votersList');
+            const votersCount = document.getElementById('votersCount');
+            const classFilter = document.getElementById('classFilter');
+            const selectedClass = classFilter.value;
+            
+            votersList.innerHTML = '';
+            
+            // Filter voters based on selection
+            let filteredVoters = voters;
+            if (selectedClass !== 'all') {
+                filteredVoters = voters.filter(v => v.class === selectedClass);
+            }
+            
+            votersCount.textContent = `${filteredVoters.length} pemilih`;
+            
+            // Group voters by class
+            const votersByClass = {};
+            filteredVoters.forEach(voter => {
+                if (!votersByClass[voter.class]) {
+                    votersByClass[voter.class] = [];
+                }
+                votersByClass[voter.class].push(voter);
+            });
+            
+            // Sort classes
+            const sortedClasses = Object.keys(votersByClass).sort();
+            
+            // Create accordion for each class
+            sortedClasses.forEach((className, index) => {
+                const classVoters = votersByClass[className];
+                const classGroup = document.createElement('div');
+                classGroup.className = 'class-group';
+                
+                const classHeader = document.createElement('div');
+                classHeader.className = 'class-header accordion-toggle';
+                classHeader.innerHTML = `
+                    <span>${className}</span>
+                    <span class="text-sm">${classVoters.length} pemilih</span>
+                `;
+                
+                const classContent = document.createElement('div');
+                classContent.className = 'class-content accordion collapsed';
+                
+                classVoters.forEach(voter => {
+                    const voterItem = document.createElement('div');
+                    voterItem.className = 'flex justify-between items-center p-2 border-b border-gray-100 last:border-0';
+                    voterItem.innerHTML = `
+                        <div>
+                            <p class="font-medium text-gray-800">${voter.name}</p>
+                            <p class="text-sm text-gray-600">NISN: ${voter.nisn}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm ${votedNisns.includes(voter.nisn) ? 'text-green-600 font-medium' : 'text-gray-400'} flex items-center space-x-1">
+                                <i class="fas ${votedNisns.includes(voter.nisn) ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                <span>${votedNisns.includes(voter.nisn) ? 'Sudah Vote' : 'Belum Vote'}</span>
+                            </span>
+                            <button onclick="deleteVoter('${voter.nisn}')" class="text-red-500 hover:text-red-700 delete-btn">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                    classContent.appendChild(voterItem);
+                });
+                
+                // Add accordion toggle functionality
+                classHeader.addEventListener('click', () => {
+                    if (classContent.classList.contains('collapsed')) {
+                        classContent.classList.remove('collapsed');
+                        classContent.classList.add('expanded');
+                    } else {
+                        classContent.classList.remove('expanded');
+                        classContent.classList.add('collapsed');
+                    }
+                });
+                
+                classGroup.appendChild(classHeader);
+                classGroup.appendChild(classContent);
+                votersList.appendChild(classGroup);
+                
+                // Expand first class by default
+                if (index === 0) {
+                    classContent.classList.remove('collapsed');
+                    classContent.classList.add('expanded');
+                }
+            });
+            
+            // Show message if no voters found
+            if (filteredVoters.length === 0) {
+                votersList.innerHTML = '<p class="text-center text-gray-500 py-4">Tidak ada pemilih yang ditemukan</p>';
+            }
+        }
+
+        // Add Candidate
+        document.getElementById('addCandidateForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('candidateName').value;
+            const candidateClass = document.getElementById('candidateClass').value;
+            const vision = document.getElementById('candidateVision').value;
+            const photoFile = document.getElementById('candidatePhoto').files[0];
+            
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const newCandidate = {
+                        id: Date.now(),
+                        name,
+                        class: candidateClass,
+                        vision,
+                        photo: event.target.result
+                    };
+                    
+                    candidates.push(newCandidate);
+                    localStorage.setItem('candidates', JSON.stringify(candidates));
+                    updateCandidatesList();
+                    updateDashboardStats();
+                    document.getElementById('addCandidateForm').reset();
+                    document.getElementById('photoPreview').classList.add('hidden');
+                    showMessage('Kandidat berhasil ditambahkan!');
+                };
+                reader.readAsDataURL(photoFile);
+            } else {
+                const newCandidate = {
+                    id: Date.now(),
+                    name,
+                    class: candidateClass,
+                    vision,
+                    photo: "👤"
+                };
+                
+                candidates.push(newCandidate);
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                updateCandidatesList();
+                updateDashboardStats();
+                document.getElementById('addCandidateForm').reset();
+                showMessage('Kandidat berhasil ditambahkan!');
+            }
+        });
+
+        // Delete Candidate
+        function deleteCandidate(id) {
+            showConfirmation(
+                'Hapus Kandidat',
+                'Apakah Anda yakin ingin menghapus kandidat ini?',
+                () => {
+                    candidates = candidates.filter(c => c.id !== id);
+                    delete votes[id];
+                    localStorage.setItem('candidates', JSON.stringify(candidates));
+                    localStorage.setItem('votes', JSON.stringify(votes));
+                    updateCandidatesList();
+                    updateDashboardStats();
+                    showMessage('Kandidat berhasil dihapus!');
+                }
+            );
+        }
+
+        // Import Candidate Handler
+        document.getElementById('importCandidateBtn').addEventListener('click', () => {
+            document.getElementById('importCandidateFile').click();
+        });
+
+        document.getElementById('importCandidateFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.zip')) {
+                showMessage('File harus berformat ZIP!', 'error');
+                return;
+            }
+
+            try {
+                const zip = new JSZip();
+                const zipContent = await zip.loadAsync(file);
+                
+                // Look for data.csv file
+                const csvFile = zipContent.file('data.csv');
+                if (!csvFile) {
+                    showMessage('File data.csv tidak ditemukan dalam ZIP!', 'error');
+                    return;
+                }
+
+                const csvText = await csvFile.async('text');
+                const lines = csvText.split('\n').filter(line => line.trim());
+                let imported = 0;
+
+                for (const line of lines) {
+                    const [name, candidateClass, vision, photoFileName] = line.split(',').map(item => item.trim());
+                    
+                    if (name && candidateClass && vision) {
+                        let photoData = "👤"; // Default emoji
+                        
+                        // Try to find photo file
+                        if (photoFileName) {
+                            const photoFile = zipContent.file(photoFileName);
+                            if (photoFile) {
+                                try {
+                                    const photoBlob = await photoFile.async('blob');
+                                    photoData = await new Promise((resolve) => {
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => resolve(e.target.result);
+                                        reader.readAsDataURL(photoBlob);
+                                    });
+                                } catch (error) {
+                                    console.log(`Could not load photo: ${photoFileName}`);
+                                }
+                            }
+                        }
+
+                        const newCandidate = {
+                            id: Date.now() + imported,
+                            name,
+                            class: candidateClass,
+                            vision,
+                            photo: photoData
+                        };
+
+                        candidates.push(newCandidate);
+                        imported++;
+                    }
+                }
+
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                updateCandidatesList();
+                updateDashboardStats();
+                showMessage(`Import kandidat berhasil! ${imported} kandidat ditambahkan`);
+                
+            } catch (error) {
+                showMessage('Error membaca file ZIP. Pastikan format file benar!', 'error');
+            }
+        });
+
+        // Download Template CSV
+        document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
+            const csvContent = 'Nama,Kelas,Visi,NamaFoto\nContoh Kandidat 1,XII IPA 1,Memajukan sekolah dengan inovasi teknologi,foto1.jpg\nContoh Kandidat 2,XII IPS 2,Meningkatkan prestasi akademik dan non-akademik,foto2.jpg';
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'template_kandidat.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showMessage('Template CSV berhasil didownload!');
+        });
+
+        // Photo Preview Handler
+        document.getElementById('candidatePhoto').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('previewImg').src = event.target.result;
+                    document.getElementById('photoPreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Update Candidates List
+        function updateCandidatesList() {
+            const candidatesList = document.getElementById('candidatesList');
+            const candidatesCount = document.getElementById('candidatesCount');
+            candidatesList.innerHTML = '';
+            candidatesCount.textContent = `${candidates.length} kandidat`;
+            
+            candidates.forEach(candidate => {
+                const candidateItem = document.createElement('div');
+                candidateItem.className = 'bg-white p-3 rounded-lg border border-gray-200';
+                
+                const photoDisplay = candidate.photo.startsWith('data:') 
+                    ? `<img src="${candidate.photo}" class="w-12 h-12 object-cover rounded-full border-2 border-purple-200">`
+                    : `<span class="text-2xl">${candidate.photo}</span>`;
+                
+                candidateItem.innerHTML = `
+                    <div class="flex items-start space-x-3">
+                        ${photoDisplay}
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">${candidate.name}</h4>
+                                    <p class="text-sm text-purple-600">${candidate.class}</p>
+                                    <p class="text-sm text-gray-600 mt-1">${candidate.vision}</p>
+                                </div>
+                                <button onclick="deleteCandidate(${candidate.id})" class="text-red-500 hover:text-red-700 delete-btn">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                candidatesList.appendChild(candidateItem);
+            });
+        }
+
+        // Student Login
+        document.getElementById('studentLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nisn = document.getElementById('studentNisn').value;
+            
+            const voter = voters.find(v => v.nisn === nisn);
+            if (!voter) {
+                showMessage('NISN tidak terdaftar!', 'error');
+                return;
+            }
+            
+            if (votedNisns.includes(nisn)) {
+                showMessage('Anda sudah melakukan voting!', 'error');
+                return;
+            }
+            
+            studentLogin.classList.add('hidden');
+            votingSection.classList.remove('hidden');
+            displayCandidatesForVoting();
+            showMessage(`Selamat datang, ${voter.name}!`);
+        });
+
+        // Display Candidates for Voting
+        function displayCandidatesForVoting() {
+            const candidatesList = document.getElementById('candidatesListVoting');
+            candidatesList.innerHTML = '';
+            
+            candidates.forEach(candidate => {
+                const candidateCard = document.createElement('div');
+                candidateCard.className = 'bg-white rounded-xl p-4 text-center candidate-card card-shadow border-2 border-transparent hover:border-purple-300';
+                
+                const photoDisplay = candidate.photo.startsWith('data:') 
+                    ? `<img src="${candidate.photo}" class="w-20 h-20 object-cover rounded-full mx-auto mb-3 border-4 border-purple-200">`
+                    : `<div class="text-5xl mb-3">${candidate.photo}</div>`;
+                
+                candidateCard.innerHTML = `
+                    ${photoDisplay}
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${candidate.name}</h3>
+                    <p class="text-purple-600 font-medium mb-2">${candidate.class}</p>
+                    <p class="text-gray-600 text-sm mb-3">${candidate.vision}</p>
+                    <button class="w-full btn-primary text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 vote-btn flex items-center justify-center space-x-2" onclick="vote(${candidate.id})">
+                        <i class="fas fa-vote-yea"></i>
+                        <span>Pilih Kandidat</span>
+                    </button>
+                `;
+                candidatesList.appendChild(candidateCard);
+            });
+        }
+
+        // Vote function
+        function vote(candidateId) {
+            const nisn = document.getElementById('studentNisn').value;
+            
+            if (votedNisns.includes(nisn)) {
+                showMessage('Anda sudah melakukan voting!', 'error');
+                return;
+            }
+            
+            votes[candidateId] = (votes[candidateId] || 0) + 1;
+            votedNisns.push(nisn);
+            
+            localStorage.setItem('votes', JSON.stringify(votes));
+            localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
+            
+            const candidate = candidates.find(c => c.id === candidateId);
+            showMessage(`Terima kasih! Anda telah memilih ${candidate.name}`);
+            
+            setTimeout(() => {
+                votingSection.classList.add('hidden');
+                studentLogin.classList.remove('hidden');
+                document.getElementById('studentNisn').value = '';
+            }, 2000);
+        }
+
+        // View Results
+        document.getElementById('viewResultsBtn').addEventListener('click', () => {
+            studentLogin.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            displayResults();
+        });
+
+        // Display Results
+        function displayResults() {
+            const resultsChart = document.getElementById('resultsChart');
+            resultsChart.innerHTML = '';
+            
+            const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            
+            candidates.forEach(candidate => {
+                const voteCount = votes[candidate.id] || 0;
+                const percentage = totalVotes > 0 ? (voteCount / totalVotes * 100).toFixed(1) : 0;
+                
+                const photoDisplay = candidate.photo.startsWith('data:') 
+                    ? `<img src="${candidate.photo}" class="w-10 h-10 object-cover rounded-full border-2 border-purple-200">`
+                    : `<span class="text-xl">${candidate.photo}</span>`;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'mb-4 bg-white p-3 rounded-xl card-shadow';
+                resultItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            ${photoDisplay}
+                            <div>
+                                <h4 class="font-semibold text-gray-800">${candidate.name}</h4>
+                                <p class="text-sm text-gray-600">${candidate.class}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-purple-600">${voteCount}</p>
+                            <p class="text-sm text-gray-600">${percentage}%</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full progress-bar" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                resultsChart.appendChild(resultItem);
+            });
+            
+            if (totalVotes === 0) {
+                resultsChart.innerHTML = '<div class="text-center py-6"><p class="text-gray-500">Belum ada suara masuk</p></div>';
+            }
+        }
+
+        // Back to login buttons
+        document.getElementById('backToLogin').addEventListener('click', () => {
+            votingSection.classList.add('hidden');
+            studentLogin.classList.remove('hidden');
+            document.getElementById('studentNisn').value = '';
+        });
+
+        document.getElementById('backToLoginFromResults').addEventListener('click', () => {
+            resultsSection.classList.add('hidden');
+            studentLogin.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
