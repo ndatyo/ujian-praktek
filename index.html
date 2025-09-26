@@ -6,6 +6,7 @@
     <title>E-Voting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -855,44 +856,16 @@
     <div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
 
     <script>
+        // Inisialisasi Supabase
+        const supabaseUrl = 'YOUR_SUPABASE_URL'; // Ganti dengan URL proyek Anda
+        const supabaseKey = 'YOUR_SUPABASE_KEY'; // Ganti dengan anon key Anda
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
         // Data Storage
-        let voters = JSON.parse(localStorage.getItem('voters')) || [];
-        let candidates = JSON.parse(localStorage.getItem('candidates')) || [];
-        let votes = JSON.parse(localStorage.getItem('votes')) || {};
-        let votedNisns = JSON.parse(localStorage.getItem('votedNisns')) || [];
-
-        // Initialize with sample data if empty
-        if (candidates.length === 0) {
-            candidates = [
-                {
-                    id: 1,
-                    name: "Ahmad Rizki",
-                    class: "XI IPA 1",
-                    vision: "Mewujudkan ujian praktek yang adil, transparan, dan berkualitas untuk kemajuan sekolah bersama.",
-                    photo: "👨‍🎓"
-                },
-                {
-                    id: 2,
-                    name: "Siti Nurhaliza",
-                    class: "XI IPS 2",
-                    vision: "Membangun sistem ujian praktek yang efektif dan meningkatkan prestasi sekolah.",
-                    photo: "👩‍🎓"
-                }
-            ];
-            localStorage.setItem('candidates', JSON.stringify(candidates));
-        }
-
-        if (voters.length === 0) {
-            voters = [
-                { name: "Budi Santoso", nisn: "1234567890", class: "X IPA 1" },
-                { name: "Ani Wijaya", nisn: "0987654321", class: "X IPS 1" },
-                { name: "Dedi Kurniawan", nisn: "1122334455", class: "XI IPA 2" },
-                { name: "Eko Prasetyo", nisn: "5544332211", class: "XI IPA 1" },
-                { name: "Fitri Handayani", nisn: "6677889900", class: "X IPA 2" },
-                { name: "Gunawan Wijaya", nisn: "9988776655", class: "X IPS 2" }
-            ];
-            localStorage.setItem('voters', JSON.stringify(voters));
-        }
+        let voters = [];
+        let candidates = [];
+        let votes = {};
+        let votedNisns = [];
 
         // DOM Elements
         const studentLogin = document.getElementById('studentLogin');
@@ -936,6 +909,147 @@
             };
         }
 
+        // Fetch data from Supabase
+        async function fetchVoters() {
+            try {
+                const { data, error } = await supabase
+                    .from('voters')
+                    .select('*');
+                
+                if (error) throw error;
+                voters = data || [];
+                updateVotersList();
+                updateClassFilter();
+            } catch (error) {
+                console.error('Error fetching voters:', error);
+                showMessage('Gagal mengambil data pemilih!', 'error');
+            }
+        }
+
+        async function fetchCandidates() {
+            try {
+                const { data, error } = await supabase
+                    .from('candidates')
+                    .select('*');
+                
+                if (error) throw error;
+                candidates = data || [];
+                updateCandidatesList();
+            } catch (error) {
+                console.error('Error fetching candidates:', error);
+                showMessage('Gagal mengambil data kandidat!', 'error');
+            }
+        }
+
+        async function fetchVotes() {
+            try {
+                const { data, error } = await supabase
+                    .from('votes')
+                    .select('*');
+                
+                if (error) throw error;
+                
+                // Reset votes and votedNisns
+                votes = {};
+                votedNisns = [];
+                
+                // Process votes data
+                data.forEach(vote => {
+                    votes[vote.candidate_id] = (votes[vote.candidate_id] || 0) + 1;
+                    votedNisns.push(vote.voter_nisn);
+                });
+                
+                updateDashboardStats();
+                updateAdminResultsChart();
+            } catch (error) {
+                console.error('Error fetching votes:', error);
+                showMessage('Gagal mengambil data voting!', 'error');
+            }
+        }
+
+        // Initialize data when page loads
+        async function initializeData() {
+            // Check if voters table is empty
+            const { data: votersData, error: votersError } = await supabase
+                .from('voters')
+                .select('*')
+                .limit(1);
+            
+            if (votersError) {
+                console.error('Error checking voters:', votersError);
+                return;
+            }
+            
+            // If voters table is empty, add sample data
+            if (votersData.length === 0) {
+                const sampleVoters = [
+                    { name: "Budi Santoso", nisn: "1234567890", class: "X IPA 1" },
+                    { name: "Ani Wijaya", nisn: "0987654321", class: "X IPS 1" },
+                    { name: "Dedi Kurniawan", nisn: "1122334455", class: "XI IPA 2" },
+                    { name: "Eko Prasetyo", nisn: "5544332211", class: "XI IPA 1" },
+                    { name: "Fitri Handayani", nisn: "6677889900", class: "X IPA 2" },
+                    { name: "Gunawan Wijaya", nisn: "9988776655", class: "X IPS 2" }
+                ];
+                
+                const { error: insertVotersError } = await supabase
+                    .from('voters')
+                    .insert(sampleVoters);
+                
+                if (insertVotersError) {
+                    console.error('Error inserting sample voters:', insertVotersError);
+                }
+            }
+            
+            // Check if candidates table is empty
+            const { data: candidatesData, error: candidatesError } = await supabase
+                .from('candidates')
+                .select('*')
+                .limit(1);
+            
+            if (candidatesError) {
+                console.error('Error checking candidates:', candidatesError);
+                return;
+            }
+            
+            // If candidates table is empty, add sample data
+            if (candidatesData.length === 0) {
+                const sampleCandidates = [
+                    {
+                        name: "Ahmad Rizki",
+                        class: "XI IPA 1",
+                        vision: "Mewujudkan ujian praktek yang adil, transparan, dan berkualitas untuk kemajuan sekolah bersama.",
+                        photo: "👨‍🎓"
+                    },
+                    {
+                        name: "Siti Nurhaliza",
+                        class: "XI IPS 2",
+                        vision: "Membangun sistem ujian praktek yang efektif dan meningkatkan prestasi sekolah.",
+                        photo: "👩‍🎓"
+                    }
+                ];
+                
+                const { error: insertCandidatesError } = await supabase
+                    .from('candidates')
+                    .insert(sampleCandidates);
+                
+                if (insertCandidatesError) {
+                    console.error('Error inserting sample candidates:', insertCandidatesError);
+                }
+            }
+        }
+
+        // Load data when page loads
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initializeData();
+            
+            // If we're in admin dashboard, fetch all data
+            if (!adminDashboard.classList.contains('hidden')) {
+                await fetchVoters();
+                await fetchCandidates();
+                await fetchVotes();
+            }
+        });
+
         // Admin Login
         document.getElementById('adminLoginBtn').addEventListener('click', () => {
             adminModal.classList.remove('hidden');
@@ -947,7 +1061,7 @@
             adminModal.classList.remove('flex');
         });
 
-        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('adminUsername').value;
             const password = document.getElementById('adminPassword').value;
@@ -956,6 +1070,12 @@
                 adminModal.classList.add('hidden');
                 studentLogin.classList.add('hidden');
                 adminDashboard.classList.remove('hidden');
+                
+                // Fetch all data
+                await fetchVoters();
+                await fetchCandidates();
+                await fetchVotes();
+                
                 updateDashboardStats();
                 updateVotersList();
                 updateCandidatesList();
@@ -975,7 +1095,7 @@
 
         // Tab Navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 const tabName = btn.getAttribute('data-tab');
                 
                 // Update active tab
@@ -994,11 +1114,16 @@
                 
                 // Update specific tab content
                 if (tabName === 'dashboard') {
+                    await fetchVoters();
+                    await fetchCandidates();
+                    await fetchVotes();
                     updateDashboardStats();
                     updateAdminResultsChart();
                 } else if (tabName === 'voters') {
+                    await fetchVoters();
                     updateVotersList();
                 } else if (tabName === 'candidates') {
+                    await fetchCandidates();
                     updateCandidatesList();
                 }
             });
@@ -1009,15 +1134,22 @@
             showConfirmation(
                 'Reset Voting',
                 'Apakah Anda yakin ingin mereset semua data voting? Tindakan ini tidak dapat dibatalkan.',
-                () => {
-                    votes = {};
-                    votedNisns = [];
-                    localStorage.setItem('votes', JSON.stringify(votes));
-                    localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
-                    updateDashboardStats();
-                    updateAdminResultsChart();
-                    updateVotersList();
-                    showMessage('Data voting berhasil direset!');
+                async () => {
+                    try {
+                        const { error } = await supabase
+                            .from('votes')
+                            .delete()
+                            .neq('id', 0); // Delete all votes
+                        
+                        if (error) throw error;
+                        
+                        // Refresh data
+                        await fetchVotes();
+                        showMessage('Data voting berhasil direset!');
+                    } catch (error) {
+                        console.error('Error resetting votes:', error);
+                        showMessage('Gagal mereset data voting!', 'error');
+                    }
                 }
             );
         });
@@ -1026,7 +1158,7 @@
         function updateDashboardStats() {
             document.getElementById('totalVoters').textContent = voters.length;
             document.getElementById('totalCandidates').textContent = candidates.length;
-            document.getElementById('totalVotes').textContent = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            document.getElementById('totalVotes').textContent = votedNisns.length;
         }
 
         // Update Admin Results Chart
@@ -1034,7 +1166,7 @@
             const adminResultsChart = document.getElementById('adminResultsChart');
             adminResultsChart.innerHTML = '';
             
-            const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            const totalVotes = votedNisns.length;
             
             if (totalVotes === 0) {
                 adminResultsChart.innerHTML = '<p class="text-center text-gray-500">Belum ada suara masuk</p>';
@@ -1061,40 +1193,59 @@
         }
 
         // Add Voter
-        document.getElementById('addVoterForm').addEventListener('submit', (e) => {
+        document.getElementById('addVoterForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('voterName').value;
             const nisn = document.getElementById('voterNisn').value;
             const voterClass = document.getElementById('voterClass').value;
             
-            if (voters.find(v => v.nisn === nisn)) {
-                showMessage('NISN sudah terdaftar!', 'error');
-                return;
+            try {
+                const { data, error } = await supabase
+                    .from('voters')
+                    .insert([{ name, nisn, class: voterClass }]);
+                
+                if (error) throw error;
+                
+                // Refresh voters list
+                await fetchVoters();
+                updateDashboardStats();
+                showMessage('Pemilih berhasil ditambahkan!');
+            } catch (error) {
+                console.error('Error adding voter:', error);
+                showMessage('Gagal menambah pemilih!', 'error');
             }
             
-            voters.push({ name, nisn, class: voterClass });
-            localStorage.setItem('voters', JSON.stringify(voters));
-            updateVotersList();
-            updateClassFilter();
-            updateDashboardStats();
             document.getElementById('addVoterForm').reset();
-            showMessage('Pemilih berhasil ditambahkan!');
         });
 
         // Delete Voter
-        function deleteVoter(nisn) {
+        async function deleteVoter(nisn) {
             showConfirmation(
                 'Hapus Pemilih',
                 'Apakah Anda yakin ingin menghapus pemilih ini?',
-                () => {
-                    voters = voters.filter(v => v.nisn !== nisn);
-                    votedNisns = votedNisns.filter(n => n !== nisn);
-                    localStorage.setItem('voters', JSON.stringify(voters));
-                    localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
-                    updateVotersList();
-                    updateClassFilter();
-                    updateDashboardStats();
-                    showMessage('Pemilih berhasil dihapus!');
+                async () => {
+                    try {
+                        const { error } = await supabase
+                            .from('voters')
+                            .delete()
+                            .eq('nisn', nisn);
+                        
+                        if (error) throw error;
+                        
+                        // Also delete any votes by this voter
+                        await supabase
+                            .from('votes')
+                            .delete()
+                            .eq('voter_nisn', nisn);
+                        
+                        // Refresh data
+                        await fetchVoters();
+                        await fetchVotes();
+                        showMessage('Pemilih berhasil dihapus!');
+                    } catch (error) {
+                        console.error('Error deleting voter:', error);
+                        showMessage('Gagal menghapus pemilih!', 'error');
+                    }
                 }
             );
         }
@@ -1104,34 +1255,51 @@
             document.getElementById('importFile').click();
         });
 
-        document.getElementById('importFile').addEventListener('change', (e) => {
+        document.getElementById('importFile').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
                 const text = event.target.result;
                 const lines = text.split('\n').filter(line => line.trim());
                 let imported = 0;
                 let skipped = 0;
 
-                lines.forEach(line => {
+                const votersToInsert = [];
+
+                for (const line of lines) {
                     const [name, nisn, voterClass] = line.split(',').map(item => item.trim());
                     if (name && nisn && voterClass) {
-                        if (!voters.find(v => v.nisn === nisn)) {
-                            voters.push({ name, nisn, class: voterClass });
+                        // Check if voter already exists
+                        const { data: existingVoter } = await supabase
+                            .from('voters')
+                            .select('id')
+                            .eq('nisn', nisn)
+                            .single();
+                        
+                        if (!existingVoter) {
+                            votersToInsert.push({ name, nisn, class: voterClass });
                             imported++;
                         } else {
                             skipped++;
                         }
                     }
-                });
+                }
 
-                localStorage.setItem('voters', JSON.stringify(voters));
-                updateVotersList();
-                updateClassFilter();
-                updateDashboardStats();
-                showMessage(`Import berhasil! ${imported} siswa ditambahkan, ${skipped} dilewati (sudah ada)`);
+                if (votersToInsert.length > 0) {
+                    const { error } = await supabase
+                        .from('voters')
+                        .insert(votersToInsert);
+                    
+                    if (error) {
+                        console.error('Error importing voters:', error);
+                        showMessage('Gagal mengimpor data pemilih!', 'error');
+                    } else {
+                        await fetchVoters();
+                        showMessage(`Import berhasil! ${imported} siswa ditambahkan, ${skipped} dilewati (sudah ada)`);
+                    }
+                }
             };
             reader.readAsText(file);
         });
@@ -1261,7 +1429,7 @@
         }
 
         // Add Candidate
-        document.getElementById('addCandidateForm').addEventListener('submit', (e) => {
+        document.getElementById('addCandidateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('candidateName').value;
             const candidateClass = document.getElementById('candidateClass').value;
@@ -1270,55 +1438,70 @@
             
             if (photoFile) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    const newCandidate = {
-                        id: Date.now(),
-                        name,
-                        class: candidateClass,
-                        vision,
-                        photo: event.target.result
-                    };
+                reader.onload = async (event) => {
+                    try {
+                        const { data, error } = await supabase
+                            .from('candidates')
+                            .insert([{ name, class: candidateClass, vision, photo: event.target.result }]);
+                        
+                        if (error) throw error;
+                        
+                        // Refresh candidates list
+                        await fetchCandidates();
+                        updateDashboardStats();
+                        showMessage('Kandidat berhasil ditambahkan!');
+                    } catch (error) {
+                        console.error('Error adding candidate:', error);
+                        showMessage('Gagal menambah kandidat!', 'error');
+                    }
                     
-                    candidates.push(newCandidate);
-                    localStorage.setItem('candidates', JSON.stringify(candidates));
-                    updateCandidatesList();
-                    updateDashboardStats();
                     document.getElementById('addCandidateForm').reset();
                     document.getElementById('photoPreview').classList.add('hidden');
-                    showMessage('Praktek berhasil ditambahkan!');
                 };
                 reader.readAsDataURL(photoFile);
             } else {
-                const newCandidate = {
-                    id: Date.now(),
-                    name,
-                    class: candidateClass,
-                    vision,
-                    photo: "👤"
-                };
+                try {
+                    const { data, error } = await supabase
+                        .from('candidates')
+                        .insert([{ name, class: candidateClass, vision, photo: "👤" }]);
+                    
+                    if (error) throw error;
+                    
+                    // Refresh candidates list
+                    await fetchCandidates();
+                    updateDashboardStats();
+                    showMessage('Kandidat berhasil ditambahkan!');
+                } catch (error) {
+                    console.error('Error adding candidate:', error);
+                    showMessage('Gagal menambah kandidat!', 'error');
+                }
                 
-                candidates.push(newCandidate);
-                localStorage.setItem('candidates', JSON.stringify(candidates));
-                updateCandidatesList();
-                updateDashboardStats();
                 document.getElementById('addCandidateForm').reset();
-                showMessage('Praktek berhasil ditambahkan!');
             }
         });
 
         // Delete Candidate
-        function deleteCandidate(id) {
+        async function deleteCandidate(id) {
             showConfirmation(
-                'Hapus Praktek',
-                'Apakah Anda yakin ingin menghapus Praktek ini?',
-                () => {
-                    candidates = candidates.filter(c => c.id !== id);
-                    delete votes[id];
-                    localStorage.setItem('candidates', JSON.stringify(candidates));
-                    localStorage.setItem('votes', JSON.stringify(votes));
-                    updateCandidatesList();
-                    updateDashboardStats();
-                    showMessage('Praktek berhasil dihapus!');
+                'Hapus Kandidat',
+                'Apakah Anda yakin ingin menghapus kandidat ini?',
+                async () => {
+                    try {
+                        const { error } = await supabase
+                            .from('candidates')
+                            .delete()
+                            .eq('id', id);
+                        
+                        if (error) throw error;
+                        
+                        // Refresh data
+                        await fetchCandidates();
+                        await fetchVotes();
+                        showMessage('Kandidat berhasil dihapus!');
+                    } catch (error) {
+                        console.error('Error deleting candidate:', error);
+                        showMessage('Gagal menghapus kandidat!', 'error');
+                    }
                 }
             );
         }
@@ -1352,6 +1535,8 @@
                 const lines = csvText.split('\n').filter(line => line.trim());
                 let imported = 0;
 
+                const candidatesToInsert = [];
+
                 for (const line of lines) {
                     const [name, candidateClass, vision, photoFileName] = line.split(',').map(item => item.trim());
                     
@@ -1375,23 +1560,29 @@
                             }
                         }
 
-                        const newCandidate = {
-                            id: Date.now() + imported,
+                        candidatesToInsert.push({
                             name,
                             class: candidateClass,
                             vision,
                             photo: photoData
-                        };
-
-                        candidates.push(newCandidate);
+                        });
                         imported++;
                     }
                 }
 
-                localStorage.setItem('candidates', JSON.stringify(candidates));
-                updateCandidatesList();
-                updateDashboardStats();
-                showMessage(`Import Praktek berhasil! ${imported} Praktek ditambahkan`);
+                if (candidatesToInsert.length > 0) {
+                    const { error } = await supabase
+                        .from('candidates')
+                        .insert(candidatesToInsert);
+                    
+                    if (error) {
+                        console.error('Error importing candidates:', error);
+                        showMessage('Gagal mengimpor data kandidat!', 'error');
+                    } else {
+                        await fetchCandidates();
+                        showMessage(`Import kandidat berhasil! ${imported} kandidat ditambahkan`);
+                    }
+                }
                 
             } catch (error) {
                 showMessage('Error membaca file ZIP. Pastikan format file benar!', 'error');
@@ -1400,12 +1591,12 @@
 
         // Download Template CSV
         document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
-            const csvContent = 'Nama,Kelas,Visi,NamaFoto\nContoh Praktek 1,XII IPA 1,Memajukan sekolah dengan inovasi teknologi,foto1.jpg\nContoh Praktek 2,XII IPS 2,Meningkatkan prestasi akademik dan non-akademik,foto2.jpg';
+            const csvContent = 'Nama,Kelas,Visi,NamaFoto\nContoh Kandidat 1,XII IPA 1,Memajukan sekolah dengan inovasi teknologi,foto1.jpg\nContoh Kandidat 2,XII IPS 2,Meningkatkan prestasi akademik dan non-akademik,foto2.jpg';
             const blob = new Blob([csvContent], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'template_Praktek.csv';
+            a.download = 'template_kandidat.csv';
             a.click();
             window.URL.revokeObjectURL(url);
             showMessage('Template CSV berhasil didownload!');
@@ -1429,7 +1620,7 @@
             const candidatesList = document.getElementById('candidatesList');
             const candidatesCount = document.getElementById('candidatesCount');
             candidatesList.innerHTML = '';
-            candidatesCount.textContent = `${candidates.length} Praktek`;
+            candidatesCount.textContent = `${candidates.length} kandidat`;
             
             candidates.forEach(candidate => {
                 const candidateItem = document.createElement('div');
@@ -1461,25 +1652,43 @@
         }
 
         // Student Login
-        document.getElementById('studentLoginForm').addEventListener('submit', (e) => {
+        document.getElementById('studentLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nisn = document.getElementById('studentNisn').value;
             
-            const voter = voters.find(v => v.nisn === nisn);
-            if (!voter) {
-                showMessage('NISN tidak terdaftar!', 'error');
-                return;
+            try {
+                const { data, error } = await supabase
+                    .from('voters')
+                    .select('*')
+                    .eq('nisn', nisn)
+                    .single();
+                
+                if (error || !data) {
+                    showMessage('NISN tidak terdaftar!', 'error');
+                    return;
+                }
+                
+                // Check if already voted
+                const { data: voteData, error: voteError } = await supabase
+                    .from('votes')
+                    .select('*')
+                    .eq('voter_nisn', nisn)
+                    .single();
+                
+                if (voteData) {
+                    showMessage('Anda sudah melakukan voting!', 'error');
+                    return;
+                }
+                
+                studentLogin.classList.add('hidden');
+                votingSection.classList.remove('hidden');
+                await fetchCandidates();
+                displayCandidatesForVoting();
+                showMessage(`Selamat datang, ${data.name}!`);
+            } catch (error) {
+                console.error('Error during student login:', error);
+                showMessage('Terjadi kesalahan saat login!', 'error');
             }
-            
-            if (votedNisns.includes(nisn)) {
-                showMessage('Anda sudah melakukan voting!', 'error');
-                return;
-            }
-            
-            studentLogin.classList.add('hidden');
-            votingSection.classList.remove('hidden');
-            displayCandidatesForVoting();
-            showMessage(`Selamat datang, ${voter.name}!`);
         });
 
         // Display Candidates for Voting
@@ -1502,7 +1711,7 @@
                     <p class="text-gray-600 text-sm mb-3">${candidate.vision}</p>
                     <button class="w-full btn-primary text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 vote-btn flex items-center justify-center space-x-2" onclick="vote(${candidate.id})">
                         <i class="fas fa-vote-yea"></i>
-                        <span>Pilih Praktek</span>
+                        <span>Pilih Kandidat</span>
                     </button>
                 `;
                 candidatesList.appendChild(candidateCard);
@@ -1510,34 +1719,36 @@
         }
 
         // Vote function
-        function vote(candidateId) {
+        async function vote(candidateId) {
             const nisn = document.getElementById('studentNisn').value;
             
-            if (votedNisns.includes(nisn)) {
-                showMessage('Anda sudah melakukan voting!', 'error');
-                return;
+            try {
+                const { data, error } = await supabase
+                    .from('votes')
+                    .insert([{ candidate_id: candidateId, voter_nisn: nisn }]);
+                
+                if (error) throw error;
+                
+                const candidate = candidates.find(c => c.id === candidateId);
+                showMessage(`Terima kasih! Anda telah memilih ${candidate.name}`);
+                
+                setTimeout(() => {
+                    votingSection.classList.add('hidden');
+                    studentLogin.classList.remove('hidden');
+                    document.getElementById('studentNisn').value = '';
+                }, 2000);
+            } catch (error) {
+                console.error('Error voting:', error);
+                showMessage('Gagal melakukan voting!', 'error');
             }
-            
-            votes[candidateId] = (votes[candidateId] || 0) + 1;
-            votedNisns.push(nisn);
-            
-            localStorage.setItem('votes', JSON.stringify(votes));
-            localStorage.setItem('votedNisns', JSON.stringify(votedNisns));
-            
-            const candidate = candidates.find(c => c.id === candidateId);
-            showMessage(`Terima kasih! Anda telah memilih ${candidate.name}`);
-            
-            setTimeout(() => {
-                votingSection.classList.add('hidden');
-                studentLogin.classList.remove('hidden');
-                document.getElementById('studentNisn').value = '';
-            }, 2000);
         }
 
         // View Results
-        document.getElementById('viewResultsBtn').addEventListener('click', () => {
+        document.getElementById('viewResultsBtn').addEventListener('click', async () => {
             studentLogin.classList.add('hidden');
             resultsSection.classList.remove('hidden');
+            await fetchCandidates();
+            await fetchVotes();
             displayResults();
         });
 
@@ -1546,7 +1757,7 @@
             const resultsChart = document.getElementById('resultsChart');
             resultsChart.innerHTML = '';
             
-            const totalVotes = Object.values(votes).reduce((sum, count) => sum + count, 0);
+            const totalVotes = votedNisns.length;
             
             candidates.forEach(candidate => {
                 const voteCount = votes[candidate.id] || 0;
