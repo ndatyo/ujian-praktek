@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Voting UJIAN PRAKTEK</title>
+    <title>E-Voting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -455,7 +455,7 @@
         <div class="container mx-auto px-6 py-3 flex justify-between items-center relative z-10">
             <div class="flex items-center space-x-3">
                 <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-10 h-10 rounded-full">
-                <h1 class="text-white text-xl font-bold">E-Voting UJIAN PRAKTEK</h1>
+                <h1 class="text-white text-xl font-bold">E-Voting PRAKTEK</h1>
             </div>
             <button id="adminLoginBtn" class="glass text-white px-4 py-1 rounded-full transition-all duration-300 hover:bg-white/20 flex items-center space-x-2 text-sm">
                 <i class="fas fa-user-shield"></i>
@@ -470,7 +470,7 @@
         <div id="studentLogin" class="max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6 animate-fade-in login-content">
             <div class="text-center mb-6">
                 <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-24 h-24 mx-auto mb-4 school-logo">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Pemilihan UJIAN PRAKTEK</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Pemilihan PRAKTEK</h2>
                 <p class="text-gray-600">Masukkan NISN untuk memulai voting</p>
             </div>
             <form id="studentLoginForm" class="space-y-4">
@@ -566,7 +566,7 @@
                             <i class="fas fa-users mr-1"></i> Pemilih
                         </button>
                         <button id="candidatesTab" class="tab-btn py-2 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700" data-tab="candidates">
-                            <i class="fas fa-user-tie mr-1"></i> Kandidat
+                            <i class="fas fa-user-tie mr-1"></i> Praktek
                         </button>
                     </nav>
                 </div>
@@ -589,7 +589,7 @@
                         <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm font-medium">Total Kandidat</p>
+                                    <p class="text-sm font-medium">Total Praktek</p>
                                     <p class="text-2xl font-bold mt-1" id="totalCandidates">0</p>
                                 </div>
                                 <div class="bg-purple-400 bg-opacity-30 p-2 rounded-full">
@@ -700,11 +700,11 @@
                         <div class="bg-gray-50 rounded-xl p-4 form-container">
                             <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center space-x-2">
                                 <i class="fas fa-user-tie text-green-600"></i>
-                                <span>Tambah Kandidat</span>
+                                <span>Tambah Praktek</span>
                             </h3>
                             <form id="addCandidateForm" class="space-y-3">
                                 <div class="relative form-group">
-                                    <input type="text" id="candidateName" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Nama Kandidat" required>
+                                    <input type="text" id="candidateName" class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg" placeholder="Nama Praktek" required>
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                                         <i class="fas fa-user text-gray-400"></i>
                                     </div>
@@ -720,7 +720,7 @@
                                 <div class="form-group">
                                     <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center space-x-2">
                                         <i class="fas fa-image text-purple-600"></i>
-                                        <span>Foto Kandidat</span>
+                                        <span>Foto Praktek</span>
                                     </label>
                                     <input type="file" id="candidatePhoto" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
                                     <div id="photoPreview" class="mt-1 hidden">
@@ -730,21 +730,21 @@
                                 
                                 <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2">
                                     <i class="fas fa-plus"></i>
-                                    <span>Tambah Kandidat</span>
+                                    <span>Tambah Praktek</span>
                                 </button>
                             </form>
                             
                             <div class="mt-3 pt-3 border-t border-gray-300">
                                 <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
                                     <i class="fas fa-file-archive text-orange-600"></i>
-                                    <span>Import Data Kandidat</span>
+                                    <span>Import Data Praktek</span>
                                 </h4>
                                 <input type="file" id="importCandidateFile" accept=".zip" class="hidden">
                                 <button id="importCandidateBtn" class="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2">
                                     <i class="fas fa-file-archive"></i>
-                                    <span>Import Kandidat (ZIP)</span>
+                                    <span>Import Praktek (ZIP)</span>
                                 </button>
-                                <p class="text-xs text-gray-500 mt-1">Upload file ZIP berisi: data.csv (Nama,Kelas,Visi) + foto kandidat</p>
+                                <p class="text-xs text-gray-500 mt-1">Upload file ZIP berisi: data.csv (Nama,Kelas,Visi) + foto Praktek</p>
                                 
                                 <div class="mt-2">
                                     <button id="downloadTemplateBtn" class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2">
@@ -760,9 +760,9 @@
                             <div class="flex justify-between items-center mb-3">
                                 <h3 class="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                                     <i class="fas fa-list text-purple-600"></i>
-                                    <span>Daftar Kandidat</span>
+                                    <span>Daftar Praktek</span>
                                 </h3>
-                                <span class="text-sm text-gray-600" id="candidatesCount">0 kandidat</span>
+                                <span class="text-sm text-gray-600" id="candidatesCount">0 Praktek</span>
                             </div>
                             <div class="bg-white rounded-lg p-3 scrollable-container relative">
                                 <div id="candidatesList" class="space-y-3"></div>
@@ -781,8 +781,8 @@
             <div class="bg-white/90 backdrop-blur-sm rounded-2xl card-shadow p-6">
                 <div class="text-center mb-6">
                     <img src="https://z-cdn-media.chatglm.cn/files/9dc31110-df90-47fa-a0d0-ad68c71980e0_logo-sekolah.png?auth_key=1790264408-30aa5e18b0434ad89b1e65954f66c69d-0-eb89bff8ae3eb018d606234bb320a228" alt="Logo SMA Negeri 20" class="w-20 h-20 mx-auto mb-3 school-logo">
-                    <h2 class="text-xl font-bold text-gray-800 mb-2">Pilih Kandidat UJIAN PRAKTEK</h2>
-                    <p class="text-gray-600">Pilih salah satu kandidat di bawah ini</p>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">Pilih Praktek UJIAN PRAKTEK</h2>
+                    <p class="text-gray-600">Pilih salah satu Praktek di bawah ini</p>
                 </div>
                 <div id="candidatesListVoting" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
                 <div class="text-center">
@@ -1285,7 +1285,7 @@
                     updateDashboardStats();
                     document.getElementById('addCandidateForm').reset();
                     document.getElementById('photoPreview').classList.add('hidden');
-                    showMessage('Kandidat berhasil ditambahkan!');
+                    showMessage('Praktek berhasil ditambahkan!');
                 };
                 reader.readAsDataURL(photoFile);
             } else {
@@ -1302,15 +1302,15 @@
                 updateCandidatesList();
                 updateDashboardStats();
                 document.getElementById('addCandidateForm').reset();
-                showMessage('Kandidat berhasil ditambahkan!');
+                showMessage('Praktek berhasil ditambahkan!');
             }
         });
 
         // Delete Candidate
         function deleteCandidate(id) {
             showConfirmation(
-                'Hapus Kandidat',
-                'Apakah Anda yakin ingin menghapus kandidat ini?',
+                'Hapus Praktek',
+                'Apakah Anda yakin ingin menghapus Praktek ini?',
                 () => {
                     candidates = candidates.filter(c => c.id !== id);
                     delete votes[id];
@@ -1318,7 +1318,7 @@
                     localStorage.setItem('votes', JSON.stringify(votes));
                     updateCandidatesList();
                     updateDashboardStats();
-                    showMessage('Kandidat berhasil dihapus!');
+                    showMessage('Praktek berhasil dihapus!');
                 }
             );
         }
@@ -1391,7 +1391,7 @@
                 localStorage.setItem('candidates', JSON.stringify(candidates));
                 updateCandidatesList();
                 updateDashboardStats();
-                showMessage(`Import kandidat berhasil! ${imported} kandidat ditambahkan`);
+                showMessage(`Import Praktek berhasil! ${imported} Praktek ditambahkan`);
                 
             } catch (error) {
                 showMessage('Error membaca file ZIP. Pastikan format file benar!', 'error');
@@ -1400,12 +1400,12 @@
 
         // Download Template CSV
         document.getElementById('downloadTemplateBtn').addEventListener('click', () => {
-            const csvContent = 'Nama,Kelas,Visi,NamaFoto\nContoh Kandidat 1,XII IPA 1,Memajukan sekolah dengan inovasi teknologi,foto1.jpg\nContoh Kandidat 2,XII IPS 2,Meningkatkan prestasi akademik dan non-akademik,foto2.jpg';
+            const csvContent = 'Nama,Kelas,Visi,NamaFoto\nContoh Praktek 1,XII IPA 1,Memajukan sekolah dengan inovasi teknologi,foto1.jpg\nContoh Praktek 2,XII IPS 2,Meningkatkan prestasi akademik dan non-akademik,foto2.jpg';
             const blob = new Blob([csvContent], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'template_kandidat.csv';
+            a.download = 'template_Praktek.csv';
             a.click();
             window.URL.revokeObjectURL(url);
             showMessage('Template CSV berhasil didownload!');
@@ -1429,7 +1429,7 @@
             const candidatesList = document.getElementById('candidatesList');
             const candidatesCount = document.getElementById('candidatesCount');
             candidatesList.innerHTML = '';
-            candidatesCount.textContent = `${candidates.length} kandidat`;
+            candidatesCount.textContent = `${candidates.length} Praktek`;
             
             candidates.forEach(candidate => {
                 const candidateItem = document.createElement('div');
@@ -1502,7 +1502,7 @@
                     <p class="text-gray-600 text-sm mb-3">${candidate.vision}</p>
                     <button class="w-full btn-primary text-white py-2 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 vote-btn flex items-center justify-center space-x-2" onclick="vote(${candidate.id})">
                         <i class="fas fa-vote-yea"></i>
-                        <span>Pilih Kandidat</span>
+                        <span>Pilih Praktek</span>
                     </button>
                 `;
                 candidatesList.appendChild(candidateCard);
